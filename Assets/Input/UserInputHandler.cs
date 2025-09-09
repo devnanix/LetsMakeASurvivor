@@ -9,6 +9,7 @@ public class UserInputHandler : ScriptableObject, UserInput.IControlActions
     private UserInput input => cachedInput ??= new UserInput();
 
     public UnityAction<Vector2> Locomotion;
+    public UnityAction Jump;
 
     private void OnEnable()
     {
@@ -25,5 +26,10 @@ public class UserInputHandler : ScriptableObject, UserInput.IControlActions
     {
         Vector2 input = context.ReadValue<Vector2>();
         Locomotion?.Invoke(input);
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed) Jump?.Invoke();
     }
 }

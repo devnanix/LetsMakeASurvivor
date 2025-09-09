@@ -2,7 +2,13 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Header("Input")]
     [SerializeField] private UserInputHandler input;
+
+    [Header("Shared")]
+    [SerializeField] private SharedFloat sharedHealth;
+
+    [Header("Settings")]
     [SerializeField] private float moveSpeed = 12f;
     [SerializeField] private float acceleration = 48f;
     [SerializeField] private float accelerationMax = 48f;
@@ -20,11 +26,13 @@ public class Player : MonoBehaviour
     private void OnEnable()
     {
         input.Locomotion += OnMove;
+        input.Jump += OnJump;
     }
 
     private void OnDisable()
     {
         input.Locomotion -= OnMove;
+        input.Jump -= OnJump;
     }
 
     private void FixedUpdate()
@@ -36,6 +44,11 @@ public class Player : MonoBehaviour
     private void OnMove(Vector2 input)
     {
         moveInput = new Vector3(input.x, 0, input.y);
+    }
+
+    private void OnJump()
+    {
+        sharedHealth.shared -= 1f;
     }
 
     private void Move()
