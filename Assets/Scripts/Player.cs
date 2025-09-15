@@ -66,6 +66,7 @@ public class Player : MonoBehaviour
 
     private void Look()
     {
+        rb.angularVelocity = Vector3.zero;
         if (moveInput == Vector3.zero) return;
 
         Quaternion rotateTo = Quaternion.LookRotation(moveInput);
