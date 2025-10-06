@@ -1,6 +1,7 @@
 using UnityEngine;
+using Physics = RotaryHeart.Lib.PhysicsExtension.Physics;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDamageable
 {
     [Header("Input")]
     [SerializeField] private UserInputHandler input;
@@ -9,6 +10,10 @@ public class Player : MonoBehaviour
     [SerializeField] private SharedFloat sharedHealth;
 
     [Header("Settings")]
+    [SerializeField] private float healthMax = 5f;
+    [SerializeField] private LayerMask targetLayer;
+
+    [Header("Locomotion")]
     [SerializeField] private float moveSpeed = 12f;
     [SerializeField] private float acceleration = 48f;
     [SerializeField] private float accelerationMax = 48f;
@@ -17,6 +22,9 @@ public class Player : MonoBehaviour
     private Rigidbody rb;
     private Vector3 moveInput = Vector3.zero;
     private Vector3 goalVelocity = Vector3.zero;
+
+
+    public float health { get => sharedHealth.shared; set => sharedHealth.shared = value; }
 
     private void Awake()
     {
@@ -48,7 +56,19 @@ public class Player : MonoBehaviour
 
     private void OnJump()
     {
-        sharedHealth.shared -= 1f;
+        Collider[] results = new Collider[16];
+        int hits = Physics.OverlapBoxNonAlloc(transform.position + Vector3.up * (1.5f), Vector3.one * 1.5f, results, transform.rotation, targetLayer, RotaryHeart.Lib.PhysicsExtension.PreviewCondition.Both, 0.1f);
+        if (hits > 0)
+        {
+            for (int i = 0; i < hits; i++)
+            {
+                Collider current = results[i];
+                if (current.transform.TryGetComponent(out IDamageable damageable))
+                {
+                    damageable.Damage(1f);
+                }
+            }
+        }
     }
 
     private void Move()
@@ -73,5 +93,29 @@ public class Player : MonoBehaviour
         Quaternion newRotation = Quaternion.RotateTowards(rb.rotation, rotateTo, rotateSpeed * Time.fixedDeltaTime);
 
         rb.MoveRotation(newRotation);
+    }
+
+    public void Damage(float amount)
+    {
+        health -= amount;
+        if (health <= 0)
+        {
+            health = 0;
+            Death();
+        }
+    }
+
+    public void Heal(float amount)
+    {
+        health += amount;
+        if (health >= healthMax)
+        {
+            health = healthMax;
+        }
+    }
+
+    public void Death()
+    {
+        // Player has died.
     }
 }

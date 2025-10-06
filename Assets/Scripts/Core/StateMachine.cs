@@ -45,7 +45,7 @@ public class StateMachine
     public void SetState(string stateName)
     {
         if (currentState != null && states[currentState].exit != null) states[currentState].exit();
-        Debug.Log($"{stateName}");
+        //Debug.Log($"{stateName}");
         currentState = stateName;
         if (currentState != null && states[currentState].enter != null) states[currentState].enter();
     }
