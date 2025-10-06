@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Pool;
 using Physics = RotaryHeart.Lib.PhysicsExtension.Physics;
 
-public class Enemy : MonoBehaviour, IDamageable
+public class Enemy : MonoBehaviour, IDamageable, IPoolable
 {
     [Header("Shared")]
     [SerializeField] private SharedTransform _target;
@@ -12,6 +12,7 @@ public class Enemy : MonoBehaviour, IDamageable
     [Header("Settings")]
     [SerializeField] private float healthMax = 1f;
     public float health { get; set; }
+    [HideInInspector] public ObjectPool<IPoolable> pool { get; set; }
 
     [Header("Locomotion")]
     [SerializeField] private float moveSpeed = 12f;
@@ -40,6 +41,7 @@ public class Enemy : MonoBehaviour, IDamageable
     private Vector3 goalVelocity = Vector3.zero;
     private float stateTime;
     private StateMachine stateMachine;
+    private WaveManager.Wave wave;
 
     private void Awake()
     {
@@ -114,7 +116,9 @@ public class Enemy : MonoBehaviour, IDamageable
         // Telegraph the attack
         Vector3 vector = (target.position - transform.position);
         Vector3 direction = vector.normalized;
-        Hold();
+        //Hold();
+        Move(Vector3.zero);
+        Look(direction, 0.2f);
         if (Time.time >= stateTime)
         {
             stateMachine.ChangeState(Attack);
@@ -159,6 +163,7 @@ public class Enemy : MonoBehaviour, IDamageable
     private void Hold()
     {
         Move(Vector3.zero);
+        Look(Vector3.zero);
     }
 
     private void Move(Vector3 direction)
@@ -203,8 +208,18 @@ public class Enemy : MonoBehaviour, IDamageable
             health = healthMax;
         }
     }
+
+    public void Spawn(WaveManager.Wave wave, Vector3 position)
+    {
+        this.wave = wave;
+        Initialize();
+        transform.position = position;
+        Events.OnEnemySpawn(this.wave);
+    }
+
     public void Death()
     {
-        Destroy(gameObject);
+        Events.OnEnemyDeath(this.wave);
+        ((IPoolable)this).Release();
     }
 }

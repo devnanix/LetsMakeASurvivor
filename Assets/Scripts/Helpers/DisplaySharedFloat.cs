@@ -6,6 +6,7 @@ public class DisplaySharedFloat : MonoBehaviour
     [SerializeField] private SharedFloat sharedFloat;
     [SerializeField] private string prefix = "";
     [SerializeField] private string suffix = "";
+    [SerializeField] private bool showAsTime = false;
 
     private TextMeshProUGUI label;
 
@@ -31,6 +32,14 @@ public class DisplaySharedFloat : MonoBehaviour
 
     void UpdateLabel(float value)
     {
-        label.text = $"{prefix}{value.ToString()}{suffix}";
+        string display = value.ToString();
+        if (showAsTime)
+        {
+            int minutes = Mathf.FloorToInt(value / 60f);
+            int seconds = Mathf.FloorToInt(value % 60f);
+            display = $"{minutes.ToString("00")}:{seconds.ToString("00")}";
+        }
+
+        label.text = $"{prefix}{display}{suffix}";
     }
 }

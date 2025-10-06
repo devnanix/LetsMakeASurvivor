@@ -29,6 +29,7 @@ public class Player : MonoBehaviour, IDamageable
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        health = healthMax;
     }
 
     private void OnEnable()
